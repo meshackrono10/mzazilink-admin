@@ -15,7 +15,7 @@ import {
 import { Scrollbar } from "src/components/scrollbar";
 import { useRouter } from "next/router";
 
-export const CustomersTable = (props) => {
+export const SuppliersTable = (props) => {
   const router = useRouter();
   const {
     count = 0,
@@ -35,22 +35,22 @@ export const CustomersTable = (props) => {
             <TableHead>
               <TableRow>
                 <TableCell>Full Name</TableCell>
-                <TableCell>Company Name</TableCell>
-                <TableCell>Physical Address</TableCell>
                 <TableCell>Phone Number</TableCell>
+                <TableCell>Company Name</TableCell>
+                <TableCell>Company Registration Number</TableCell>
                 <TableCell>Date Registered</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {items.map((customer) => {
                 const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, "dd/MM/yyyy");
+                const dateRegistered = format(new Date(customer.date_registered), "dd/MM/yyyy");
                 return (
                   <TableRow
                     hover
                     key={customer.id}
                     selected={isSelected}
-                    onClick={() => router.push(`/supply/supplier/${customer.id}`)} // Handle row click
+                    onClick={() => router.push(`/supply/supplier/${customer.id}`)}
                     style={{ cursor: "pointer" }}
                   >
                     <TableCell>
@@ -60,15 +60,13 @@ export const CustomersTable = (props) => {
                         direction="row"
                         spacing={2}
                       >
-                        <Typography variant="subtitle2">{customer.name}</Typography>
+                        <Typography variant="subtitle2">{customer.full_name}</Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>
-                      {customer.address.city}, {customer.address.state}, {customer.address.country}
-                    </TableCell>
-                    <TableCell>{customer.phone}</TableCell>
-                    <TableCell>{createdAt}</TableCell>
+                    <TableCell>{customer.phone_number}</TableCell>
+                    <TableCell>{customer.company_name}</TableCell>
+                    <TableCell>{customer.company_registration_number}</TableCell>
+                    <TableCell>{dateRegistered}</TableCell>
                   </TableRow>
                 );
               })}
@@ -89,7 +87,7 @@ export const CustomersTable = (props) => {
   );
 };
 
-CustomersTable.propTypes = {
+SuppliersTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   onPageChange: PropTypes.func,

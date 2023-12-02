@@ -39,7 +39,7 @@ export const items = [
 
   {
     title: "Purchase Orders",
-    path: "/purchaseOrders",
+    path: "/purchaseOrders/purchaseOrders",
     icon: (
       <SvgIcon fontSize="small">
         <ShoppingCartIcon class="h-6 w-6 text-gray-500" />
@@ -57,7 +57,7 @@ export const items = [
   },
   {
     title: "Products",
-    path: "/products",
+    path: "/Products/products",
     icon: (
       <SvgIcon fontSize="small">
         <ProductIcon />

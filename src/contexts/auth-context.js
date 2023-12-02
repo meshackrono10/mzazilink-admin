@@ -20,8 +20,7 @@ const handlers = {
 
     return {
       ...state,
-      ...// if payload (user) is provided, then is authenticated
-      (user
+      ...(user
         ? {
             isAuthenticated: true,
             isLoading: false,
@@ -53,8 +52,6 @@ const handlers = {
 const reducer = (state, action) =>
   handlers[action.type] ? handlers[action.type](state, action) : state;
 
-// The role of this context is to propagate authentication state through the App tree.
-
 export const AuthContext = createContext({ undefined });
 
 export const AuthProvider = (props) => {
@@ -63,7 +60,6 @@ export const AuthProvider = (props) => {
   const initialized = useRef(false);
 
   const initialize = async () => {
-    // Prevent from calling twice in development mode with React.StrictMode enabled
     if (initialized.current) {
       return;
     }
@@ -73,7 +69,7 @@ export const AuthProvider = (props) => {
     let isAuthenticated = false;
 
     try {
-      isAuthenticated = window.sessionStorage.getItem("authenticated") === "true";
+      isAuthenticated = localStorage.getItem("authenticated") === "true";
     } catch (err) {
       console.error(err);
     }
@@ -97,17 +93,13 @@ export const AuthProvider = (props) => {
     }
   };
 
-  useEffect(
-    () => {
-      initialize();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    initialize();
+  }, []);
 
   const skip = () => {
     try {
-      window.sessionStorage.setItem("authenticated", "true");
+      localStorage.setItem("authenticated", "true");
     } catch (err) {
       console.error(err);
     }
@@ -125,34 +117,8 @@ export const AuthProvider = (props) => {
     });
   };
 
-  // const signIn = async (email, password) => {
-  //   if (email !== "demo@devias.io" || password !== "Password123!") {
-  //     throw new Error("Please check your email and password");
-  //   }
-
-  //   try {
-  //     window.sessionStorage.setItem("authenticated", "true");
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-
-  //   const user = {
-  //     id: "5e86809283e28b96d2d38537",
-  //     avatar: "/assets/avatars/avatar-anika-visser.png",
-  //     name: "Anika Visser",
-  //     email: "anika.visser@devias.io",
-  //   };
-
-  //   dispatch({
-  //     type: HANDLERS.SIGN_IN,
-  //     payload: user,
-  //   });
-  // };
-
   const signIn = async (email, password) => {
     try {
-      // Log the URL for debugging purposes
-
       const response = await axios.post(
         "http://159.203.141.75:81/api/v2/school/user/login/",
         {
@@ -167,44 +133,55 @@ export const AuthProvider = (props) => {
         },
         {
           headers: {
-            preflightContinue: false,
-            "x-api-key": "random token",
+            userId: "8989",
+            securityCode: "ipj0DjOqyd7faka1aa9z1dA1mXESh1zfo5QV8PuuPnJwadTfal3ujesPspAgA2Nb",
+            phoneNumber: "0728110017",
+            "Content-Type": "application/json",
           },
         }
       );
 
-      // Handle response
-      console.log("Response:", response.data);
-
       if (!response.data.success) {
-        // Handle authentication failure with error message from the backend
         const errorMessage = response.data.message || "Authentication failed";
         throw new Error(errorMessage);
       }
 
-      // Update session storage to mark the user as authenticated
-      window.sessionStorage.setItem("authenticated", "true");
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("authenticated", "true");
 
-      // Dispatch the SIGN_IN action with user data
       dispatch({
         type: HANDLERS.SIGN_IN,
         payload: response.data,
       });
     } catch (err) {
-      // Handle any errors during the login process
       console.error(err);
       throw new Error(err.message || "Authentication failed");
     }
   };
 
-  const signUp = async (email, name, password) => {
-    throw new Error("Sign up is not implemented");
-  };
+  const signOut = async () => {
+    try {
+      const storedToken = localStorage.getItem("token").toString();
 
-  const signOut = () => {
-    dispatch({
-      type: HANDLERS.SIGN_OUT,
-    });
+      await axios.post(
+        "http://159.203.141.75:81/api/v2/school/user/logout/",
+        {},
+        {
+          headers: {
+            token: storedToken,
+          },
+        }
+      );
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("authenticated");
+
+      dispatch({
+        type: HANDLERS.SIGN_OUT,
+      });
+    } catch (error) {
+      console.error("Error during sign out:", error);
+    }
   };
 
   return (
@@ -213,7 +190,6 @@ export const AuthProvider = (props) => {
         ...state,
         skip,
         signIn,
-        signUp,
         signOut,
       }}
     >

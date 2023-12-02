@@ -17,20 +17,28 @@ import {
   CardHeader,
   Container,
   FormControl,
-  InputAdornment,
   InputLabel,
   MenuItem,
   OutlinedInput,
   Select,
   SvgIcon,
 } from "@mui/material";
+import axios from "axios"; // Import Axios
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function AddCustomer() {
+export default function AddSupplier() {
   const [open, setOpen] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    full_name: "",
+    physical_address: "",
+    notes: "",
+    company_name: "",
+    company_registration_number: "",
+    phone_number: "",
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -38,6 +46,39 @@ export default function AddCustomer() {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Get the token from local storage
+      const storedToken = localStorage.getItem("token").toString();
+
+      // Make a POST request with the form data
+      const response = await axios.post(
+        "http://159.203.141.75:81/api/v1/school/procurement/new-supplier/",
+        formData,
+        {
+          headers: {
+            token: storedToken,
+          },
+        }
+      );
+
+      // Handle the response as needed
+      console.log("Response:", response);
+
+      // Close the dialog
+      handleClose();
+    } catch (error) {
+      console.error("Error during form submission:", error);
+    }
   };
 
   return (
@@ -55,19 +96,7 @@ export default function AddCustomer() {
       </Button>
 
       <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
-        <AppBar sx={{ position: "relative" }}>
-          <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
-              <CloseIcon />
-            </IconButton>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-              {/* form */}
-            </Typography>
-            <Button autoFocus color="inherit" onClick={handleClose}>
-              save
-            </Button>
-          </Toolbar>
-        </AppBar>
+        {/* ... (Your existing code for the dialog) */}
         <List>
           <Container sx={{ marginTop: "1rem" }}>
             <Card sx={{ p: 2, display: "flex", flexWrap: "wrap" }}>
@@ -79,13 +108,18 @@ export default function AddCustomer() {
                 <Divider />
               </Box>
               <Box sx={{ width: "50%", minWidth: "400px" }}>
+                {/* ... (Your existing code for form inputs) */}
                 {[
-                  { label: "Full Name", placeholder: "" },
-                  { label: "Physical Address", placeholder: "" },
-                  { label: "Notes", placeholder: "" },
-                  { label: "Company name", placeholder: "" },
-                  { label: "Company Registration Number", placeholder: "" },
-                  { label: "School", placeholder: "" },
+                  { label: "Full Name", placeholder: "", field: "full_name" },
+                  { label: "Physical Address", placeholder: "", field: "physical_address" },
+                  { label: "Notes", placeholder: "", field: "notes" },
+                  { label: "Company name", placeholder: "", field: "company_name" },
+                  {
+                    label: "Company Registration Number",
+                    placeholder: "",
+                    field: "company_registration_number",
+                  },
+                  { label: "Phone Number", placeholder: "", field: "phone_number" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
                     <ListItem
@@ -104,6 +138,7 @@ export default function AddCustomer() {
                         defaultValue=""
                         fullWidth
                         placeholder={inputField.placeholder}
+                        onChange={(e) => handleInputChange(inputField.field, e.target.value)}
                         sx={{
                           marginLeft: "20px",
                         }}
@@ -121,59 +156,10 @@ export default function AddCustomer() {
                     alignItems: "start",
                   }}
                 >
-                  <p>
-                    <span style={{ color: "red" }}>* </span>Is active
-                  </p>
-                  <FormControl sx={{ width: "100%", marginLeft: "20px" }}>
-                    <InputLabel id="demo-simple-select-label">Select</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Is Active"
-                    >
-                      <MenuItem value="true">True</MenuItem>
-                      <MenuItem value="false">False</MenuItem>
-                    </Select>
-                  </FormControl>
-                </ListItem>
-                <Divider />
-
-                <ListItem
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-start",
-                    alignItems: "start",
-                  }}
-                >
-                  <p>
-                    <span style={{ color: "red" }}>* </span>Are Contacts Valid
-                  </p>
-                  <FormControl sx={{ width: "100%", marginLeft: "20px" }}>
-                    <InputLabel id="demo-simple-select-label">select</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Are Contacts Valid"
-                    >
-                      <MenuItem value="true">True</MenuItem>
-                      <MenuItem value="false">False</MenuItem>
-                    </Select>
-                  </FormControl>
-                </ListItem>
-
-                <ListItem
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-start",
-                    alignItems: "start",
-                  }}
-                >
                   <Button
                     sx={{ width: "100%", marginRight: "5px" }}
                     variant="contained"
-                    onClick={handleClickOpen}
+                    onClick={handleSubmit} // Call handleSubmit on button click
                   >
                     Submit
                   </Button>

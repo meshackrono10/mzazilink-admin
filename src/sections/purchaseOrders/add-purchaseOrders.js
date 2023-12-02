@@ -25,6 +25,7 @@ import {
   OutlinedInput,
 } from "@mui/material";
 import MaxHeightTextarea from "src/components/textArea";
+import axios from "axios";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -32,6 +33,15 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export default function AddPurchaseOrders() {
   const [open, setOpen] = React.useState(false);
+  const [formValues, setFormValues] = React.useState({
+    order_number: "",
+    mode_of_payment: "",
+    requesting_department: "",
+    notes: "",
+    expected_by_date: "",
+    product_id: "",
+    supplier_id: "",
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -39,6 +49,57 @@ export default function AddPurchaseOrders() {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Get the token from local storage
+      const storedToken = localStorage.getItem("token").toString();
+
+      // Data to be posted
+      const postData = {
+        // order_number: "48876",
+        // mode_of_payment: "CHEQUE",
+        // requesting_department: "Library",
+        // notes: "New purchase order",
+        // expected_by_date: "05-11-2023",
+        // product_id: 1,
+        // supplier_id: 20,
+        order_number: formValues.order_number,
+        mode_of_payment: formValues.mode_of_payment,
+        requesting_department: formValues.requesting_department,
+        notes: formValues.notes,
+        expected_by_date: formValues.expected_by_date,
+        product_id: formValues.product_id,
+        supplier_id: formValues.supplier_id,
+      };
+
+      // Make a POST request with the data
+      const response = await axios.post(
+        "http://159.203.141.75:81/api/v1/school/procurement/new-order/",
+        postData,
+        {
+          headers: {
+            token: storedToken,
+          },
+        }
+      );
+
+      // Handle the response as needed
+      console.log("Response:", response);
+
+      // Close the dialog
+      handleClose();
+    } catch (error) {
+      console.error("Error during form submission:", error);
+    }
   };
 
   return (
@@ -81,12 +142,21 @@ export default function AddPurchaseOrders() {
               </Box>
               <Box sx={{ width: "50%", minWidth: "400px" }}>
                 {[
-                  { labelName: "Full Name", placeholder: "" },
-                  { labelName: "Physical Address", placeholder: "" },
-                  { labelName: "Company name", placeholder: "" },
-                  { labelName: "Company Registration Number", placeholder: "" },
-                  { labelName: "School", placeholder: "" },
-                  { labelName: "Notes", placeholder: "" },
+                  { labelName: "Order Number", placeholder: "", field: "order_number" },
+                  { labelName: "Mode Of Payment", placeholder: "", field: "mode_of_payment" },
+                  {
+                    labelName: "Requesting Department",
+                    placeholder: "",
+                    field: "requesting_department",
+                  },
+                  {
+                    labelName: "Notes",
+                    placeholder: "",
+                    field: "notes",
+                  },
+                  { labelName: "Expected By Date", placeholder: "", field: "expected_by_date" },
+                  { labelName: "Supplier Id", placeholder: "", field: "supplier_id" },
+                  { labelName: "Product Id", placeholder: "", field: "product_id" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
                     <ListItem
@@ -102,17 +172,23 @@ export default function AddPurchaseOrders() {
                         {inputField.labelName}
                       </p>
                       {inputField.labelName === "Notes" ? (
-                        <MaxHeightTextarea />
+                        <MaxHeightTextarea
+                          onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                        />
                       ) : (
                         <FormControl sx={{ width: "100%" }}>
-                          <OutlinedInput defaultValue="" fullWidth />
+                          <OutlinedInput
+                            defaultValue=""
+                            fullWidth
+                            onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          />
                         </FormControl>
                       )}
                     </ListItem>
                     <Divider />
                   </React.Fragment>
                 ))}
-
+                {/* 
                 <ListItem
                   sx={{
                     display: "flex",
@@ -130,6 +206,7 @@ export default function AddPurchaseOrders() {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       label="Is Active"
+                      onChange={(e) => handleInputChange("isActive", e.target.value)}
                     >
                       <MenuItem value="true">True</MenuItem>
                       <MenuItem value="false">False</MenuItem>
@@ -158,7 +235,8 @@ export default function AddPurchaseOrders() {
                           <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label="Are Contacts Valid"
+                            label={selectField.labelName}
+                            onChange={(e) => handleInputChange(selectField.field, e.target.value)}
                           >
                             <MenuItem value="true">True</MenuItem>
                             <MenuItem value="false">False</MenuItem>
@@ -167,7 +245,7 @@ export default function AddPurchaseOrders() {
                       </ListItem>
                     </React.Fragment>
                   )
-                )}
+                )} */}
 
                 <ListItem
                   sx={{
@@ -180,7 +258,7 @@ export default function AddPurchaseOrders() {
                   <Button
                     sx={{ width: "100%", marginRight: "5px" }}
                     variant="contained"
-                    onClick={handleClickOpen}
+                    onClick={handleSubmit}
                   >
                     Submit
                   </Button>

@@ -17,6 +17,7 @@ import {
 import { Scrollbar } from "src/components/scrollbar";
 import { getInitials } from "src/utils/get-initials";
 import { SeverityPill } from "src/components/severity-pill";
+import { useRouter } from "next/router";
 
 const statusMap = {
   false: "warning",
@@ -24,6 +25,8 @@ const statusMap = {
 };
 
 export const PurchaseOrdersTable = (props) => {
+  const router = useRouter();
+
   const {
     count = 0,
     items = [],
@@ -61,7 +64,12 @@ export const PurchaseOrdersTable = (props) => {
                 const createdAt = format(customer.createdAt, "dd/MM/yyyy");
 
                 return (
-                  <TableRow hover key={customer.id} selected={isSelected}>
+                  <TableRow
+                    onClick={() => router.push(`/purchaseOrders/purchaseOrders/${customer.id}`)}
+                    hover
+                    key={customer.id}
+                    selected={isSelected}
+                  >
                     <TableCell>
                       <Stack
                         alignItems="center"

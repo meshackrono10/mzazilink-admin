@@ -5,47 +5,21 @@ import ArrowUpOnSquareIcon from "@heroicons/react/24/solid/ArrowUpOnSquareIcon";
 import { Box, Button, Container, Stack, SvgIcon, Typography } from "@mui/material";
 import { useSelection } from "src/hooks/use-selection";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
-import { SuppliersTable } from "src/sections/suppliers/suppliers-table"; // Changed from CustomersTable
-import { SuppliersSearch } from "src/sections/suppliers/suppliers-search"; // Changed from CustomersSearch
 import { applyPagination } from "src/utils/apply-pagination";
-import AddSupplier from "src/sections/suppliers/add-suppliers"; // Changed from AddCustomer
+import { ProductSearch } from "src/sections/products/product-search";
+import { ProductTable } from "src/sections/products/product-table";
+import AddProduct from "src/sections/products/add-product";
 import axios from "axios";
 
-const useSuppliers = (page, rowsPerPage, data) => {
-  return useMemo(() => {
-    return applyPagination(data, page, rowsPerPage);
-  }, [page, rowsPerPage, data]);
-};
-
-const useSupplierIds = (suppliers) => {
-  return useMemo(() => {
-    return suppliers.map((supplier) => supplier.id);
-  }, [suppliers]);
-};
-
-const Page = () => {
+const useProducts = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const suppliers = useSuppliers(page, rowsPerPage, data);
-  const supplierIds = useSupplierIds(suppliers);
-  const suppliersSelection = useSelection(supplierIds);
-
-  const handlePageChange = useCallback((event, value) => {
-    setPage(value);
-  }, []);
-
-  const handleRowsPerPageChange = useCallback((event) => {
-    setRowsPerPage(event.target.value);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedToken = localStorage.getItem("token").toString();
         const fetchedData = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/suppliers/",
+          "http://159.203.141.75:81/api/v1/school/procurement/products/",
           {
             offset: page * rowsPerPage,
             per_page: rowsPerPage,
@@ -57,19 +31,43 @@ const Page = () => {
           }
         );
 
-        setData(fetchedData.data.data); // Use fetched data from the API
+        setData(fetchedData.data.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, [page, rowsPerPage]); // Include dependencies to rerun the effect when page or rowsPerPage change
+  }, [page, rowsPerPage]);
+
+  return data;
+};
+
+const useProductIds = (products) => {
+  return useMemo(() => {
+    return products.map((product) => product.id);
+  }, [products]);
+};
+
+const Page = () => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const products = useProducts(page, rowsPerPage);
+  const productIds = useProductIds(products);
+  const productsSelection = useSelection(productIds);
+
+  const handlePageChange = useCallback((event, value) => {
+    setPage(value);
+  }, []);
+
+  const handleRowsPerPageChange = useCallback((event) => {
+    setRowsPerPage(event.target.value);
+  }, []);
 
   return (
     <>
       <Head>
-        <title>Suppliers | Devias Kit</title>
+        <title>Products | Devias Kit</title>
       </Head>
       <Box
         component="main"
@@ -82,7 +80,7 @@ const Page = () => {
           <Stack spacing={3}>
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
-                <Typography variant="h4">Suppliers</Typography>
+                <Typography variant="h4">Products</Typography>
                 <Stack alignItems="center" direction="row" spacing={1}>
                   <Button
                     color="inherit"
@@ -107,22 +105,22 @@ const Page = () => {
                 </Stack>
               </Stack>
               <div>
-                <AddSupplier />
+                <AddProduct />
               </div>
             </Stack>
-            <SuppliersSearch />
-            <SuppliersTable
-              count={data.length}
-              items={suppliers}
-              onDeselectAll={suppliersSelection.handleDeselectAll}
-              onDeselectOne={suppliersSelection.handleDeselectOne}
+            <ProductSearch />
+            <ProductTable
+              count={products.length}
+              items={applyPagination(products, page, rowsPerPage)}
+              onDeselectAll={productsSelection.handleDeselectAll}
+              onDeselectOne={productsSelection.handleDeselectOne}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
-              onSelectAll={suppliersSelection.handleSelectAll}
-              onSelectOne={suppliersSelection.handleSelectOne}
+              onSelectAll={productsSelection.handleSelectAll}
+              onSelectOne={productsSelection.handleSelectOne}
               page={page}
               rowsPerPage={rowsPerPage}
-              selected={suppliersSelection.selected}
+              selected={productsSelection.selected}
             />
           </Stack>
         </Container>
