@@ -6,12 +6,12 @@ import { Box, Button, Container, Stack, SvgIcon, Typography } from "@mui/materia
 import { useSelection } from "src/hooks/use-selection";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { applyPagination } from "src/utils/apply-pagination";
-import { PurchaseOrdersSearch } from "src/sections/purchaseOrders/purchaseOrders-search";
-import { PurchaseOrdersTable } from "src/sections/purchaseOrders/purchaseOrders-table";
-import AddPurchaseOrders from "src/sections/purchaseOrders/add-purchaseOrders";
+import AddPayment from "src/sections/payments/add-payments";
+import { PaymentSearch } from "src/sections/payments/payments-search";
+import { PaymentTable } from "src/sections/payments/payments-table";
 import axios from "axios";
 
-const usePurchaseOrders = (page, rowsPerPage) => {
+const usePayments = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const usePurchaseOrders = (page, rowsPerPage) => {
       try {
         const storedToken = localStorage.getItem("token").toString();
         const fetchedData = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/purchase-orders/",
+          "http://159.203.141.75:81/api/v1/school/procurement/school-payments/",
           {
             offset: page * rowsPerPage,
             per_page: rowsPerPage,
@@ -43,18 +43,18 @@ const usePurchaseOrders = (page, rowsPerPage) => {
   return data;
 };
 
-const usePurchaseOrderIds = (purchaseOrders) => {
+const usePaymentIds = (payments) => {
   return useMemo(() => {
-    return purchaseOrders.map((order) => order.id);
-  }, [purchaseOrders]);
+    return payments.map((payment) => payment.id);
+  }, [payments]);
 };
 
-const Page = () => {
+const PaymentsPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const purchaseOrders = usePurchaseOrders(page, rowsPerPage);
-  const purchaseOrderIds = usePurchaseOrderIds(purchaseOrders);
-  const purchaseOrdersSelection = useSelection(purchaseOrderIds);
+  const payments = usePayments(page, rowsPerPage);
+  const paymentIds = usePaymentIds(payments);
+  const paymentsSelection = useSelection(paymentIds);
 
   const handlePageChange = useCallback((event, value) => {
     setPage(value);
@@ -67,7 +67,7 @@ const Page = () => {
   return (
     <>
       <Head>
-        <title>Purchase Orders | Devias Kit</title>
+        <title>Payments | Devias Kit</title>
       </Head>
       <Box
         component="main"
@@ -80,7 +80,7 @@ const Page = () => {
           <Stack spacing={3}>
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
-                <Typography variant="h4">Purchase Orders </Typography>
+                <Typography variant="h4">Payments</Typography>
                 <Stack alignItems="center" direction="row" spacing={1}>
                   <Button
                     color="inherit"
@@ -105,22 +105,22 @@ const Page = () => {
                 </Stack>
               </Stack>
               <div>
-                <AddPurchaseOrders />
+                <AddPayment />
               </div>
             </Stack>
-            <PurchaseOrdersSearch />
-            <PurchaseOrdersTable
-              count={purchaseOrders.length}
-              items={applyPagination(purchaseOrders, page, rowsPerPage)}
-              onDeselectAll={purchaseOrdersSelection.handleDeselectAll}
-              onDeselectOne={purchaseOrdersSelection.handleDeselectOne}
+            <PaymentSearch />
+            <PaymentTable
+              count={payments.length}
+              items={applyPagination(payments, page, rowsPerPage)}
+              onDeselectAll={paymentsSelection.handleDeselectAll}
+              onDeselectOne={paymentsSelection.handleDeselectOne}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
-              onSelectAll={purchaseOrdersSelection.handleSelectAll}
-              onSelectOne={purchaseOrdersSelection.handleSelectOne}
+              onSelectAll={paymentsSelection.handleSelectAll}
+              onSelectOne={paymentsSelection.handleSelectOne}
               page={page}
               rowsPerPage={rowsPerPage}
-              selected={purchaseOrdersSelection.selected}
+              selected={paymentsSelection.selected}
             />
           </Stack>
         </Container>
@@ -129,6 +129,6 @@ const Page = () => {
   );
 };
 
-Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
+PaymentsPage.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
-export default Page;
+export default PaymentsPage;

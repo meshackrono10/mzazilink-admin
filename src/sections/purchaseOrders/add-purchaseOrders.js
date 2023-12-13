@@ -65,13 +65,6 @@ export default function AddPurchaseOrders() {
 
       // Data to be posted
       const postData = {
-        // order_number: "48876",
-        // mode_of_payment: "CHEQUE",
-        // requesting_department: "Library",
-        // notes: "New purchase order",
-        // expected_by_date: "05-11-2023",
-        // product_id: 1,
-        // supplier_id: 20,
         order_number: formValues.order_number,
         mode_of_payment: formValues.mode_of_payment,
         requesting_department: formValues.requesting_department,

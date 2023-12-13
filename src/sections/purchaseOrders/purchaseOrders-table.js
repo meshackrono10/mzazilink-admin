@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
-  Avatar,
   Box,
   Card,
   Checkbox,
@@ -15,13 +14,13 @@ import {
   Typography,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
-import { getInitials } from "src/utils/get-initials";
 import { SeverityPill } from "src/components/severity-pill";
 import { useRouter } from "next/router";
 
 const statusMap = {
-  false: "warning",
-  true: "success",
+  PENDING: "warning",
+  DELIVERED: "success",
+  // Add more status mappings as needed
 };
 
 export const PurchaseOrdersTable = (props) => {
@@ -51,7 +50,7 @@ export const PurchaseOrdersTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Item</TableCell>
+                <TableCell>Order Number</TableCell>
                 <TableCell>Supplier</TableCell>
                 <TableCell>Requesting Department</TableCell>
                 <TableCell>As Delivered</TableCell>
@@ -59,38 +58,26 @@ export const PurchaseOrdersTable = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((customer) => {
-                const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, "dd/MM/yyyy");
+              {items.map((order) => {
+                const isSelected = selected.includes(order.id);
+                const expectedByDate = format(new Date(order.expected_by_date), "dd/MM/yyyy");
 
                 return (
                   <TableRow
-                    onClick={() => router.push(`/purchaseOrders/purchaseOrders/${customer.id}`)}
+                    onClick={() => router.push(`/purchaseOrders/purchaseOrders/${order.id}`)}
                     hover
-                    key={customer.id}
+                    key={order.id}
                     selected={isSelected}
                   >
+                    <TableCell>{order.order_number}</TableCell>
+                    <TableCell>{order.supplier.full_name}</TableCell>
+                    <TableCell>{order.requesting_department}</TableCell>
                     <TableCell>
-                      <Stack
-                        alignItems="center"
-                        sx={{ height: "40px" }}
-                        direction="row"
-                        spacing={2}
-                      >
-                        {/* <Avatar src={customer.avatar}>{getInitials(customer.name)}</Avatar> */}
-                        <Typography variant="subtitle2">{customer.name}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>
-                      {customer.address.city}, {customer.address.state}, {customer.address.country}
-                    </TableCell>
-                    <TableCell>
-                      <SeverityPill color={statusMap[customer.status.toString()]}>
-                        {customer.status.toString()}
+                      <SeverityPill color={statusMap[order.delivery_status]}>
+                        {order.delivery_status}
                       </SeverityPill>
                     </TableCell>
-                    <TableCell>{createdAt}</TableCell>
+                    <TableCell>{expectedByDate}</TableCell>
                   </TableRow>
                 );
               })}

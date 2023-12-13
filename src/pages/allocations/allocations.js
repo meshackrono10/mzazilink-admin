@@ -6,24 +6,20 @@ import { Box, Button, Container, Stack, SvgIcon, Typography } from "@mui/materia
 import { useSelection } from "src/hooks/use-selection";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { applyPagination } from "src/utils/apply-pagination";
-import { PurchaseOrdersSearch } from "src/sections/purchaseOrders/purchaseOrders-search";
-import { PurchaseOrdersTable } from "src/sections/purchaseOrders/purchaseOrders-table";
-import AddPurchaseOrders from "src/sections/purchaseOrders/add-purchaseOrders";
+import { AllocationTable } from "src/sections/allocations/allocations-table";
+import { AllocationSearch } from "src/sections/allocations/allocations-search";
+import AddAllocation from "src/sections/allocations/add-allocations";
 import axios from "axios";
 
-const usePurchaseOrders = (page, rowsPerPage) => {
+const useAllocations = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedToken = localStorage.getItem("token").toString();
-        const fetchedData = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/purchase-orders/",
-          {
-            offset: page * rowsPerPage,
-            per_page: rowsPerPage,
-          },
+        const fetchedData = await axios.get(
+          "http://159.203.141.75:81/api/v1/school/procurement/stream-allocations/",
           {
             headers: {
               token: storedToken,
@@ -43,18 +39,18 @@ const usePurchaseOrders = (page, rowsPerPage) => {
   return data;
 };
 
-const usePurchaseOrderIds = (purchaseOrders) => {
+const useAllocationIds = (allocations) => {
   return useMemo(() => {
-    return purchaseOrders.map((order) => order.id);
-  }, [purchaseOrders]);
+    return allocations.map((allocation) => allocation.id);
+  }, [allocations]);
 };
 
 const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const purchaseOrders = usePurchaseOrders(page, rowsPerPage);
-  const purchaseOrderIds = usePurchaseOrderIds(purchaseOrders);
-  const purchaseOrdersSelection = useSelection(purchaseOrderIds);
+  const allocations = useAllocations(page, rowsPerPage);
+  const allocationIds = useAllocationIds(allocations);
+  const allocationsSelection = useSelection(allocationIds);
 
   const handlePageChange = useCallback((event, value) => {
     setPage(value);
@@ -67,7 +63,7 @@ const Page = () => {
   return (
     <>
       <Head>
-        <title>Purchase Orders | Devias Kit</title>
+        <title>Allocations | Devias Kit</title>
       </Head>
       <Box
         component="main"
@@ -80,7 +76,7 @@ const Page = () => {
           <Stack spacing={3}>
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
-                <Typography variant="h4">Purchase Orders </Typography>
+                <Typography variant="h4">Allocations</Typography>
                 <Stack alignItems="center" direction="row" spacing={1}>
                   <Button
                     color="inherit"
@@ -105,22 +101,22 @@ const Page = () => {
                 </Stack>
               </Stack>
               <div>
-                <AddPurchaseOrders />
+                <AddAllocation />
               </div>
             </Stack>
-            <PurchaseOrdersSearch />
-            <PurchaseOrdersTable
-              count={purchaseOrders.length}
-              items={applyPagination(purchaseOrders, page, rowsPerPage)}
-              onDeselectAll={purchaseOrdersSelection.handleDeselectAll}
-              onDeselectOne={purchaseOrdersSelection.handleDeselectOne}
+            <AllocationSearch />
+            <AllocationTable
+              count={allocations.length}
+              items={applyPagination(allocations, page, rowsPerPage)}
+              onDeselectAll={allocationsSelection.handleDeselectAll}
+              onDeselectOne={allocationsSelection.handleDeselectOne}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
-              onSelectAll={purchaseOrdersSelection.handleSelectAll}
-              onSelectOne={purchaseOrdersSelection.handleSelectOne}
+              onSelectAll={allocationsSelection.handleSelectAll}
+              onSelectOne={allocationsSelection.handleSelectOne}
               page={page}
               rowsPerPage={rowsPerPage}
-              selected={purchaseOrdersSelection.selected}
+              selected={allocationsSelection.selected}
             />
           </Stack>
         </Container>

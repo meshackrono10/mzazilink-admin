@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
-  Avatar,
   Box,
   Card,
   Checkbox,
@@ -45,36 +44,28 @@ export const AllocationTable = (props) => {
                 <TableCell>To Department</TableCell>
                 <TableCell>From Department </TableCell>
                 <TableCell>Quantity </TableCell>
-                <TableCell>Amount</TableCell>
+                <TableCell>Student</TableCell>
                 <TableCell>Initiated By</TableCell>
                 <TableCell>Product</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((customer) => {
-                const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, "dd/MM/yyyy");
+              {items.map((allocation) => {
+                const isSelected = selected.includes(allocation.id);
+                const { product, student, timestamp, quantity, notes, date_added, allocated_by } =
+                  allocation;
+                const createdAt = format(new Date(date_added), "dd/MM/yyyy");
 
                 return (
-                  <TableRow hover key={customer.id} selected={isSelected}>
+                  <TableRow hover key={allocation.id} selected={isSelected}>
                     <TableCell>
-                      <Stack
-                        alignItems="center"
-                        direction="row"
-                        sx={{ height: "40px" }}
-                        spacing={2}
-                      >
-                        {/* <Avatar></Avatar> */}
-                        <Typography variant="subtitle2">{customer.name}</Typography>
-                      </Stack>
+                      {/* Add rendering logic for 'To Department' */} {allocated_by}
                     </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>
-                      {customer.address.city}, {customer.address.state}, {customer.address.country}
-                    </TableCell>
-                    <TableCell>{customer.phone}</TableCell>
-                    <TableCell>{createdAt}</TableCell>
-                    <TableCell>{customer.product}</TableCell>
+                    <TableCell>{/* Add rendering logic for 'From Department' */}</TableCell>
+                    <TableCell>{quantity}</TableCell>
+                    <TableCell>{student?.student_name}</TableCell>
+                    <TableCell>{allocated_by.full_name}</TableCell>
+                    <TableCell>{product.item_name}</TableCell>
                   </TableRow>
                 );
               })}
