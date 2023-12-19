@@ -17,9 +17,19 @@ const useAllocations = (page, rowsPerPage) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const storedToken = localStorage.getItem("token").toString();
-        const fetchedData = await axios.get(
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
+          // Handle the case where the token is not available
+          console.error("Token not found in localStorage");
+          return;
+        }
+
+        const response = await axios.post(
           "http://159.203.141.75:81/api/v1/school/procurement/stream-allocations/",
+          {
+            offset: page * rowsPerPage,
+            per_page: rowsPerPage,
+          },
           {
             headers: {
               token: storedToken,
@@ -27,7 +37,8 @@ const useAllocations = (page, rowsPerPage) => {
           }
         );
 
-        setData(fetchedData.data.data);
+        setData(response.data.data);
+        console.log(response.data.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

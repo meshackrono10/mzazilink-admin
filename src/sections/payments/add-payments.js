@@ -19,8 +19,13 @@ import {
   FormControl,
   SvgIcon,
   OutlinedInput,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import axios from "axios";
+import { useEffect } from "react";
+import { fetchData } from "src/utils/fetchData";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -30,10 +35,13 @@ export default function AddPayment() {
   const [open, setOpen] = React.useState(false);
   const [formValues, setFormValues] = React.useState({
     cheque_number: "",
-    purchase_order_id: "",
     amount: "",
   });
-
+  const [purchaseOrderIdData, setPurchaseOrderIdData] = React.useState([]);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = React.useState(0);
+  const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = React.useState("");
+  console.log();
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -49,6 +57,29 @@ export default function AddPayment() {
     }));
   };
 
+  const handleProductSelection = (purchaseOrderId) => {
+    setSelectedPurchaseOrderId(purchaseOrderId);
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      purchase_order_id: purchaseOrderId,
+    }));
+  };
+
+  useEffect(() => {
+    const fetchPurchaseOrdersData = async () => {
+      const purchaseOrderIdData = await fetchData(
+        "http://159.203.141.75:81/api/v1/school/procurement/purchase-orders/",
+        {
+          offset: page * rowsPerPage,
+          per_page: rowsPerPage,
+        }
+      );
+      setPurchaseOrderIdData(purchaseOrderIdData);
+    };
+
+    fetchPurchaseOrdersData();
+  }, [page, rowsPerPage]);
+
   const handleSubmit = async () => {
     try {
       // Get the token from local storage
@@ -57,7 +88,7 @@ export default function AddPayment() {
       // Data to be posted
       const postData = {
         cheque_number: formValues.cheque_number,
-        purchase_order_id: formValues.purchase_order_id,
+        purchase_order_id: selectedPurchaseOrderId,
         amount: formValues.amount,
       };
 
@@ -127,7 +158,6 @@ export default function AddPayment() {
                     placeholder: "",
                     field: "cheque_number",
                   },
-                  { labelName: "Purchase Order Id", placeholder: "", field: "purchase_order_id" },
                   { labelName: "Amount", placeholder: "", field: "amount" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
@@ -155,6 +185,28 @@ export default function AddPayment() {
                   </React.Fragment>
                 ))}
 
+                <ListItem>
+                  <FormControl fullWidth>
+                    <p>
+                      Purchase Order Number
+                      <span style={{ color: "red", marginLeft: "5px" }}>* </span>
+                    </p>
+
+                    <Select
+                      labelId="Purchase-Order-Number-select-label"
+                      id="Purchase Order Number-select"
+                      label="Purchase Order Number"
+                      value={selectedPurchaseOrderId}
+                      onChange={(e) => handleProductSelection(e.target.value)}
+                    >
+                      {purchaseOrderIdData.map((data, index) => (
+                        <MenuItem key={index} value={data.id}>
+                          {data.order_number}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </ListItem>
                 <ListItem
                   sx={{
                     display: "flex",

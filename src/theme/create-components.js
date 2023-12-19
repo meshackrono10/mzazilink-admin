@@ -1,3 +1,4 @@
+// createComponents file
 import {
   createTheme,
   filledInputClasses,
@@ -186,6 +187,43 @@ export function createComponents(config) {
       },
     },
     MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          "&:hover": {
+            backgroundColor: palette.action.hover,
+            [`& .${outlinedInputClasses.notchedOutline}`]: {
+              borderColor: palette.neutral[200],
+            },
+          },
+          [`&.${outlinedInputClasses.focused}`]: {
+            backgroundColor: "transparent",
+            [`& .${outlinedInputClasses.notchedOutline}`]: {
+              borderColor: palette.primary.main,
+              boxShadow: `${palette.primary.main} 0 0 0 2px`,
+            },
+          },
+          [`&.${filledInputClasses.error}`]: {
+            [`& .${outlinedInputClasses.notchedOutline}`]: {
+              borderColor: palette.error.main,
+              boxShadow: `${palette.error.main} 0 0 0 2px`,
+            },
+          },
+        },
+        input: {
+          fontSize: 14,
+          fontWeight: 500,
+          lineHeight: "24px",
+          "&::placeholder": {
+            color: "gray",
+          },
+        },
+        notchedOutline: {
+          borderColor: palette.neutral[200],
+          transition: muiTheme.transitions.create(["border-color", "box-shadow"]),
+        },
+      },
+    },
+    MuiTextareaAutosize: {
       styleOverrides: {
         root: {
           "&:hover": {

@@ -20,12 +20,15 @@ import {
   OutlinedInput,
   Divider,
   ListItem,
+  TextareaAutosize,
+  TextField,
 } from "@mui/material";
 import MaxHeightTextarea from "src/components/textArea";
 import axios from "axios";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import PropTypes from "prop-types";
+import { fetchData } from "src/utils/fetchData";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -58,23 +61,21 @@ TabPanel.propTypes = {
 export default function AddAllocation() {
   const [open, setOpen] = useState(false);
   const [formValues, setFormValues] = useState({
-    amount: "",
-    date_of_expense: "",
-    expense_type: "",
     notes: "",
     spent_by: "",
     product_id: "",
-    supplier_id: "",
-    to_department: "", // Added for product allocation
-    student_number: "", // Added for student allocation
-    quantity: "", // Added for both
+    to_department: "",
+    student_number: "",
+    quantity: "",
   });
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tabValue, setTabValue] = useState(0);
   const [productsData, setProductsData] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedProductIdProductTab, setSelectedProductIdProductTab] = useState("");
+  const [selectedProductIdStudentTab, setSelectedProductIdStudentTab] = useState("");
+  const [selectedItemName, setSelectedItemName] = useState("");
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -87,25 +88,13 @@ export default function AddAllocation() {
   };
 
   const handleProductSelection = (productId) => {
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      product_id: productId,
-    }));
-    setSelectedProductId(productId);
-  };
-
-  const fetchData = async (url, params) => {
-    try {
-      const storedToken = localStorage.getItem("token").toString();
-      const fetchedData = await axios.post(url, params, {
-        headers: {
-          token: storedToken,
-        },
-      });
-      return fetchedData.data.data;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return [];
+    const selectedProduct = productsData.find((data) => data.product_id === productId);
+    if (tabValue === 0) {
+      setSelectedProductIdProductTab(productId);
+      setSelectedItemName(selectedProduct ? selectedProduct.item_name : "");
+    } else if (tabValue === 1) {
+      setSelectedProductIdStudentTab(productId);
+      setSelectedItemName(selectedProduct ? selectedProduct.item_name : "");
     }
   };
 
@@ -137,13 +126,13 @@ export default function AddAllocation() {
       const storedToken = localStorage.getItem("token").toString();
 
       const postData = {
-        product_id: formValues.product_id,
+        product_id: selectedProductIdProductTab,
         to_department: formValues.to_department,
         notes: formValues.notes,
         quantity: formValues.quantity,
         id: 0,
       };
-
+      console.log(postData);
       await axios.post(
         "http://159.203.141.75:81/api/v1/school/procurement/new-allocation/",
         postData,
@@ -166,9 +155,10 @@ export default function AddAllocation() {
 
       const postData = {
         student_number: formValues.student_number,
-        product_id: formValues.product_id,
+        product_id: selectedProductIdStudentTab,
         quantity: formValues.quantity,
       };
+      console.log(postData);
 
       await axios.post(
         "http://159.203.141.75:81/api/v1/school/procurement/allocate-student/",
@@ -247,12 +237,13 @@ export default function AddAllocation() {
                     placeholder: "",
                     field: "to_department",
                   },
+
+                  { labelName: "Quantity", placeholder: "", field: "quantity" },
                   {
                     labelName: "Notes",
                     placeholder: "",
                     field: "notes",
                   },
-                  { labelName: "Quantity", placeholder: "", field: "quantity" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
                     <ListItem
@@ -268,8 +259,16 @@ export default function AddAllocation() {
                         {inputField.labelName}
                       </p>
                       {inputField.labelName === "Notes" ? (
-                        <MaxHeightTextarea
+                        <TextField
+                          id="standard-multiline-flexible"
+                          placeholder={inputField.placeholder}
+                          multiline
+                          minRows={4}
+                          maxRows={6}
+                          variant="outlined"
+                          value={formValues[inputField.field]}
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          style={{ width: "100%" }}
                         />
                       ) : (
                         <FormControl sx={{ width: "100%" }}>
@@ -287,16 +286,18 @@ export default function AddAllocation() {
                 {/* productsData */}
                 <ListItem>
                   <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Products</InputLabel>
+                    <InputLabel id="student-select-label">
+                      {"Products" || selectedProductIdProductTab}
+                    </InputLabel>
                     <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Age"
-                      value={selectedProductId}
+                      labelId="student-select-label"
+                      id="student-select"
+                      label="Products"
+                      value={selectedProductIdProductTab}
                       onChange={(e) => handleProductSelection(e.target.value)}
                     >
                       {productsData.map((data, index) => (
-                        <MenuItem key={index} value={data.product_id}>
+                        <MenuItem key={index} value={data.id}>
                           {data.item_name}
                         </MenuItem>
                       ))}
@@ -353,35 +354,31 @@ export default function AddAllocation() {
                         <span style={{ color: "red" }}>* </span>
                         {inputField.labelName}
                       </p>
-                      {inputField.labelName === "Notes" ? (
-                        <MaxHeightTextarea
+                      <FormControl sx={{ width: "100%" }}>
+                        <OutlinedInput
+                          defaultValue=""
+                          fullWidth
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
                         />
-                      ) : (
-                        <FormControl sx={{ width: "100%" }}>
-                          <OutlinedInput
-                            defaultValue=""
-                            fullWidth
-                            onChange={(e) => handleInputChange(inputField.field, e.target.value)}
-                          />
-                        </FormControl>
-                      )}
+                      </FormControl>
                     </ListItem>
                     <Divider />
                   </React.Fragment>
                 ))}{" "}
                 <ListItem>
                   <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Products</InputLabel>
+                    <InputLabel id="student-select-label">
+                      {"Products" || selectedProductIdStudentTab}
+                    </InputLabel>
                     <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Age"
-                      value={selectedProductId}
+                      labelId="student-select-label"
+                      id="student-select"
+                      label="Products"
+                      value={selectedProductIdStudentTab}
                       onChange={(e) => handleProductSelection(e.target.value)}
                     >
                       {productsData.map((data, index) => (
-                        <MenuItem key={index} value={data.product_id}>
+                        <MenuItem key={index} value={data.id}>
                           {data.item_name}
                         </MenuItem>
                       ))}

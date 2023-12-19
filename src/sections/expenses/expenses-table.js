@@ -1,11 +1,8 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
-  Avatar,
   Box,
   Card,
-  Checkbox,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +12,6 @@ import {
   Typography,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
-import { getInitials } from "src/utils/get-initials";
 
 export const ExpensesTable = (props) => {
   const {
@@ -50,27 +46,16 @@ export const ExpensesTable = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((customer) => {
-                const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, "dd/MM/yyyy");
+              {items.map((expense) => {
+                const isSelected = selected.includes(expense.id);
+                const createdAt = format(expense.timestamp * 1000, "dd/MM/yyyy");
 
                 return (
-                  <TableRow hover key={customer.id} selected={isSelected}>
-                    <TableCell>
-                      <Stack
-                        alignItems="center"
-                        direction="row"
-                        sx={{ height: "40px" }}
-                        spacing={2}
-                      >
-                        <Typography variant="subtitle2">{customer.name}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>
-                      {customer.address.city}, {customer.address.state}, {customer.address.country}
-                    </TableCell>
-                    <TableCell>{customer.phone}</TableCell>
+                  <TableRow hover key={expense.id} selected={isSelected}>
+                    <TableCell>{expense.processed_by.full_name}</TableCell>
+                    <TableCell>{expense.spent_by}</TableCell>
+                    <TableCell>{expense.type}</TableCell>
+                    <TableCell>{expense.amount}</TableCell>
                     <TableCell>{createdAt}</TableCell>
                   </TableRow>
                 );

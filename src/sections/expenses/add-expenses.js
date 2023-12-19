@@ -23,6 +23,7 @@ import {
   TextareaAutosize,
   SvgIcon,
   OutlinedInput,
+  TextField,
 } from "@mui/material";
 import MaxHeightTextarea from "src/components/textArea";
 import axios from "axios";
@@ -134,17 +135,14 @@ export default function AddExpenses() {
               <Box sx={{ width: "50%", minWidth: "400px" }}>
                 {[
                   { labelName: "Amount", placeholder: "", field: "amount" },
-                  { labelName: "Date Of Expense", placeholder: "", field: "date_of_expense" },
                   {
-                    labelName: "Expense Type",
+                    labelName: "Date Of Expense",
                     placeholder: "",
-                    field: "expense_type",
+                    field: "date_of_expense",
+                    type: "date",
                   },
-                  {
-                    labelName: "Notes",
-                    placeholder: "",
-                    field: "notes",
-                  },
+                  { labelName: "Expense Type", placeholder: "", field: "expense_type" },
+                  { labelName: "Notes", placeholder: "", field: "notes" },
                   { labelName: "Spent By", placeholder: "", field: "spent_by" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
@@ -161,9 +159,25 @@ export default function AddExpenses() {
                         {inputField.labelName}
                       </p>
                       {inputField.labelName === "Notes" ? (
-                        <MaxHeightTextarea
+                        <TextField
+                          multiline
+                          minRows={4}
+                          maxRows={6}
+                          variant="outlined"
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          style={{ width: "100%" }}
                         />
+                      ) : inputField.type === "date" ? (
+                        <FormControl sx={{ width: "100%" }}>
+                          <TextField
+                            type="date"
+                            fullWidth
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          />
+                        </FormControl>
                       ) : (
                         <FormControl sx={{ width: "100%" }}>
                           <OutlinedInput

@@ -10,20 +10,10 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
-import {
-  Box,
-  Card,
-  CardHeader,
-  Container,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  SvgIcon,
-} from "@mui/material";
+import TextField from "@mui/material/TextField"; // Import TextField
+import { Box, Card, CardHeader, Container, OutlinedInput, SvgIcon } from "@mui/material";
 import axios from "axios"; // Import Axios
+import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -96,7 +86,19 @@ export default function AddSupplier() {
       </Button>
 
       <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
-        {/* ... (Your existing code for the dialog) */}
+        <AppBar sx={{ position: "relative" }}>
+          <Toolbar>
+            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+              <CloseIcon />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              {/* form */}
+            </Typography>
+            <Button autoFocus color="inherit" onClick={handleClose}>
+              save
+            </Button>
+          </Toolbar>
+        </AppBar>
         <List>
           <Container sx={{ marginTop: "1rem" }}>
             <Card sx={{ p: 2, display: "flex", flexWrap: "wrap" }}>
@@ -108,11 +110,17 @@ export default function AddSupplier() {
                 <Divider />
               </Box>
               <Box sx={{ width: "50%", minWidth: "400px" }}>
-                {/* ... (Your existing code for form inputs) */}
                 {[
                   { label: "Full Name", placeholder: "", field: "full_name" },
                   { label: "Physical Address", placeholder: "", field: "physical_address" },
-                  { label: "Notes", placeholder: "", field: "notes" },
+                  {
+                    label: "Notes",
+                    placeholder: "",
+                    field: "notes",
+                    multiline: true,
+                    minRows: 4,
+                    maxRows: 6,
+                  },
                   { label: "Company name", placeholder: "", field: "company_name" },
                   {
                     label: "Company Registration Number",
@@ -131,18 +139,29 @@ export default function AddSupplier() {
                       }}
                     >
                       <p>
-                        <span style={{ color: "red" }}>* </span>
                         {inputField.label}
+                        <span style={{ color: "red", marginLeft: "5px" }}>* </span>
                       </p>
-                      <OutlinedInput
-                        defaultValue=""
-                        fullWidth
-                        placeholder={inputField.placeholder}
-                        onChange={(e) => handleInputChange(inputField.field, e.target.value)}
-                        sx={{
-                          marginLeft: "20px",
-                        }}
-                      />
+                      {inputField.multiline ? (
+                        <TextField
+                          multiline
+                          minRows={inputField.minRows}
+                          maxRows={inputField.maxRows}
+                          variant="outlined"
+                          onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          style={{ width: "100%", marginLeft: "20px" }}
+                        />
+                      ) : (
+                        <OutlinedInput
+                          defaultValue=""
+                          fullWidth
+                          placeholder={inputField.placeholder}
+                          onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          sx={{
+                            marginLeft: "20px",
+                          }}
+                        />
+                      )}
                     </ListItem>
                     <Divider />
                   </React.Fragment>
@@ -159,7 +178,7 @@ export default function AddSupplier() {
                   <Button
                     sx={{ width: "100%", marginRight: "5px" }}
                     variant="contained"
-                    onClick={handleSubmit} // Call handleSubmit on button click
+                    onClick={handleSubmit}
                   >
                     Submit
                   </Button>

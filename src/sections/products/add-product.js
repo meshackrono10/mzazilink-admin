@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import MaxHeightTextarea from "src/components/textArea";
 import axios from "axios";
+import TextField from "@mui/material/TextField";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -128,8 +129,8 @@ export default function AddProduct() {
             <Card sx={{ p: 2, display: "flex", flexWrap: "wrap" }}>
               <Box sx={{ width: "50%" }}>
                 <CardHeader
-                  subheader="Fill in all the inputs to be able to create a purchase orders"
-                  title="Create purchase orders"
+                  subheader="Fill in all the inputs to be able to create a product"
+                  title="Create a product"
                 />
                 <Divider />
               </Box>
@@ -188,8 +189,13 @@ export default function AddProduct() {
                           </RadioGroup>
                         </FormControl>
                       ) : inputField.labelName === "notes" ? (
-                        <MaxHeightTextarea
+                        <TextField
+                          multiline
+                          minRows={4}
+                          maxRows={6}
+                          variant="outlined"
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          style={{ width: "100%" }}
                         />
                       ) : (
                         <FormControl sx={{ width: "100%" }}>

@@ -19,19 +19,28 @@ import { AccountPopover } from "./account-popover";
 import MoonIcon from "@heroicons/react/24/solid/MoonIcon";
 import SunIcon from "@heroicons/react/24/solid/SunIcon";
 import { useState } from "react";
+import { useAuthContext } from "src/contexts/auth-context";
+import { useEffect } from "react";
 
 const SIDE_NAV_WIDTH = 280;
 const TOP_NAV_HEIGHT = 64;
 
 export const TopNav = (props) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, setIsDarkMode } = useAuthContext();
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  console.log(isDarkMode);
   const { onNavOpen } = props;
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
   const accountPopover = usePopover();
+  useEffect(() => {
+    // Save isDarkMode state to local storage
+    localStorage.setItem("isDarkMode", JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    window.location.reload();
+  };
 
   return (
     <>
@@ -85,15 +94,7 @@ export const TopNav = (props) => {
                 </SvgIcon>
               </IconButton>
             </Tooltip>
-            {/* <Tooltip title="Notifications">
-              <IconButton>
-                <Badge badgeContent={4} color="success" variant="dot">
-                  <SvgIcon fontSize="small">
-                    <BellIcon />
-                  </SvgIcon>
-                </Badge>
-              </IconButton>
-            </Tooltip> */}
+
             <Tooltip title="Dark Mode / Light Mode">
               <IconButton onClick={toggleDarkMode}>
                 <SvgIcon fontSize="small">{isDarkMode ? <MoonIcon /> : <SunIcon />}</SvgIcon>

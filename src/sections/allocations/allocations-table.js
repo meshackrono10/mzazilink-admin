@@ -42,30 +42,27 @@ export const AllocationTable = (props) => {
             <TableHead>
               <TableRow>
                 <TableCell>To Department</TableCell>
-                <TableCell>From Department </TableCell>
                 <TableCell>Quantity </TableCell>
-                <TableCell>Student</TableCell>
+                <TableCell>Student / Department</TableCell>
                 <TableCell>Initiated By</TableCell>
                 <TableCell>Product</TableCell>
+                <TableCell>Date Added </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {items.map((allocation) => {
                 const isSelected = selected.includes(allocation.id);
-                const { product, student, timestamp, quantity, notes, date_added, allocated_by } =
-                  allocation;
-                const createdAt = format(new Date(date_added), "dd/MM/yyyy");
+
+                const createdAt = format(new Date(allocation.date_added), "dd/MM/yyyy");
 
                 return (
                   <TableRow hover key={allocation.id} selected={isSelected}>
-                    <TableCell>
-                      {/* Add rendering logic for 'To Department' */} {allocated_by}
-                    </TableCell>
-                    <TableCell>{/* Add rendering logic for 'From Department' */}</TableCell>
-                    <TableCell>{quantity}</TableCell>
-                    <TableCell>{student?.student_name}</TableCell>
-                    <TableCell>{allocated_by.full_name}</TableCell>
-                    <TableCell>{product.item_name}</TableCell>
+                    <TableCell>{allocation.allocated_by.full_name}</TableCell>
+                    <TableCell>{allocation.quantity}</TableCell>
+                    <TableCell>{allocation?.student?.student_name}</TableCell>
+                    <TableCell>{allocation.allocated_by.full_name}</TableCell>
+                    <TableCell>{allocation.product.item_name}</TableCell>
+                    <TableCell>{createdAt}</TableCell>
                   </TableRow>
                 );
               })}

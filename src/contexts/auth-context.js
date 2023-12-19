@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import { useState } from "react";
 
 const HANDLERS = {
   INITIALIZE: "INITIALIZE",
@@ -183,6 +184,17 @@ export const AuthProvider = (props) => {
       console.error("Error during sign out:", error);
     }
   };
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    initialize();
+
+    // Load isDarkMode state from local storage on component mount
+    const savedIsDarkMode = localStorage.getItem("isDarkMode");
+    if (savedIsDarkMode) {
+      setIsDarkMode(JSON.parse(savedIsDarkMode));
+    }
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -191,6 +203,8 @@ export const AuthProvider = (props) => {
         skip,
         signIn,
         signOut,
+        isDarkMode,
+        setIsDarkMode,
       }}
     >
       {children}

@@ -10,22 +10,17 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
-import {
-  Box,
-  Card,
-  CardHeader,
-  Container,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextareaAutosize,
-  SvgIcon,
-  OutlinedInput,
-} from "@mui/material";
-import MaxHeightTextarea from "src/components/textArea";
+import TextField from "@mui/material/TextField";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import { Box, Card, CardHeader, Container, SvgIcon } from "@mui/material";
 import axios from "axios";
+import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
+import { useState, useEffect } from "react";
+import { fetchData } from "src/utils/fetchData";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -39,9 +34,13 @@ export default function AddPurchaseOrders() {
     requesting_department: "",
     notes: "",
     expected_by_date: "",
-    product_id: "",
-    supplier_id: "",
   });
+  const [productsData, setProductsData] = useState([]);
+  const [suppliersData, setSuppliersData] = useState([]);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(0);
+  const [selectedProductIdProduct, setSelectedProductIdProduct] = useState("");
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -58,6 +57,25 @@ export default function AddPurchaseOrders() {
     }));
   };
 
+  const handleProductSelection = (productId, type) => {
+    const selectedProduct = productsData.find((data) => data.id === productId);
+    const selectedSupplier = suppliersData.find((data) => data.id === productId);
+
+    if (type === "product") {
+      setSelectedProductIdProduct(productId);
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        product_id: productId,
+      }));
+    } else if (type === "supplier") {
+      setSelectedSupplierId(productId);
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        supplier_id: productId,
+      }));
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       // Get the token from local storage
@@ -70,9 +88,10 @@ export default function AddPurchaseOrders() {
         requesting_department: formValues.requesting_department,
         notes: formValues.notes,
         expected_by_date: formValues.expected_by_date,
-        product_id: formValues.product_id,
-        supplier_id: formValues.supplier_id,
+        product_id: selectedProductIdProduct,
+        supplier_id: selectedSupplierId,
       };
+      console.log(postData);
 
       // Make a POST request with the data
       const response = await axios.post(
@@ -94,6 +113,31 @@ export default function AddPurchaseOrders() {
       console.error("Error during form submission:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchProductsData = async () => {
+      const productsData = await fetchData(
+        "http://159.203.141.75:81/api/v1/school/procurement/products/",
+        {
+          offset: page * rowsPerPage,
+          per_page: rowsPerPage,
+        }
+      );
+      setProductsData(productsData);
+    };
+    const fetchSuppliersData = async () => {
+      const productsData = await fetchData(
+        "http://159.203.141.75:81/api/v1/school/procurement/suppliers/",
+        {
+          offset: page * rowsPerPage,
+          per_page: rowsPerPage,
+        }
+      );
+      setSuppliersData(productsData);
+    };
+    fetchSuppliersData();
+    fetchProductsData();
+  }, [page, rowsPerPage]);
 
   return (
     <React.Fragment>
@@ -142,14 +186,13 @@ export default function AddPurchaseOrders() {
                     placeholder: "",
                     field: "requesting_department",
                   },
+                  { labelName: "Notes", placeholder: "", field: "notes" },
                   {
-                    labelName: "Notes",
+                    labelName: "Expected By Date",
+                    type: "date",
                     placeholder: "",
-                    field: "notes",
+                    field: "expected_by_date",
                   },
-                  { labelName: "Expected By Date", placeholder: "", field: "expected_by_date" },
-                  { labelName: "Supplier Id", placeholder: "", field: "supplier_id" },
-                  { labelName: "Product Id", placeholder: "", field: "product_id" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
                     <ListItem
@@ -161,13 +204,29 @@ export default function AddPurchaseOrders() {
                       }}
                     >
                       <p>
-                        <span style={{ color: "red" }}>* </span>
                         {inputField.labelName}
+                        <span style={{ color: "red", marginLeft: "5px" }}>* </span>
                       </p>
                       {inputField.labelName === "Notes" ? (
-                        <MaxHeightTextarea
+                        <TextField
+                          multiline
+                          minRows={4}
+                          maxRows={6}
+                          variant="outlined"
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          style={{ width: "100%" }}
                         />
+                      ) : inputField.type === "date" ? (
+                        <FormControl sx={{ width: "100%" }}>
+                          <TextField
+                            type="date"
+                            fullWidth
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                          />
+                        </FormControl>
                       ) : (
                         <FormControl sx={{ width: "100%" }}>
                           <OutlinedInput
@@ -181,64 +240,48 @@ export default function AddPurchaseOrders() {
                     <Divider />
                   </React.Fragment>
                 ))}
-                {/* 
-                <ListItem
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-start",
-                    alignItems: "start",
-                  }}
-                >
-                  <p>
-                    <span style={{ color: "red" }}>* </span>Is active
-                  </p>
-                  <FormControl sx={{ width: "100%" }}>
-                    <InputLabel id="demo-simple-select-label">Select</InputLabel>
+                <ListItem>
+                  <FormControl fullWidth>
+                    <p>
+                      Supplier
+                      <span style={{ color: "red", marginLeft: "5px" }}>* </span>
+                    </p>
                     <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Is Active"
-                      onChange={(e) => handleInputChange("isActive", e.target.value)}
+                      labelId="supplier-select-label"
+                      id="supplier-select"
+                      label="Suppliers"
+                      value={selectedSupplierId}
+                      onChange={(e) => handleProductSelection(e.target.value, "supplier")}
                     >
-                      <MenuItem value="true">True</MenuItem>
-                      <MenuItem value="false">False</MenuItem>
+                      {suppliersData.map((data, index) => (
+                        <MenuItem key={index} value={data.id}>
+                          {data.full_name}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </ListItem>
-                <Divider />
-
-                {[{ labelName: "Are Contacts Valid" }, { labelName: "Is active" }].map(
-                  (selectField, index) => (
-                    <React.Fragment key={index}>
-                      <ListItem
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "flex-start",
-                          alignItems: "start",
-                        }}
-                      >
-                        <p>
-                          <span style={{ color: "red" }}>* </span>
-                          {selectField.labelName}
-                        </p>
-                        <FormControl sx={{ width: "100%" }}>
-                          <InputLabel id="demo-simple-select-label">select</InputLabel>
-                          <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label={selectField.labelName}
-                            onChange={(e) => handleInputChange(selectField.field, e.target.value)}
-                          >
-                            <MenuItem value="true">True</MenuItem>
-                            <MenuItem value="false">False</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </ListItem>
-                    </React.Fragment>
-                  )
-                )} */}
+                <ListItem>
+                  <FormControl fullWidth>
+                    <p>
+                      Product
+                      <span style={{ color: "red", marginLeft: "5px" }}>* </span>
+                    </p>
+                    <Select
+                      labelId="product-select-label"
+                      id="product-select"
+                      label="Products"
+                      value={selectedProductIdProduct}
+                      onChange={(e) => handleProductSelection(e.target.value, "product")}
+                    >
+                      {productsData.map((data, index) => (
+                        <MenuItem key={index} value={data.id}>
+                          {data.item_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </ListItem>
 
                 <ListItem
                   sx={{
