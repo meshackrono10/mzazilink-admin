@@ -142,8 +142,8 @@ export default function AddExpenses() {
                     type: "date",
                   },
                   { labelName: "Expense Type", placeholder: "", field: "expense_type" },
-                  { labelName: "Notes", placeholder: "", field: "notes" },
                   { labelName: "Spent By", placeholder: "", field: "spent_by" },
+                  { labelName: "Notes", placeholder: "", field: "notes" },
                 ].map((inputField, index) => (
                   <React.Fragment key={index}>
                     <ListItem

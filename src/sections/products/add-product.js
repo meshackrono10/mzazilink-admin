@@ -52,9 +52,12 @@ export default function AddProduct() {
   };
 
   const handleInputChange = (field, value) => {
+    // For is_consumable field, convert the value to a boolean
+    const sanitizedValue = field === "is_consumable" ? value === "true" || value === true : value;
+
     setFormValues((prevValues) => ({
       ...prevValues,
-      [field]: value,
+      [field]: sanitizedValue,
     }));
   };
 
@@ -191,7 +194,7 @@ export default function AddProduct() {
                       ) : inputField.labelName === "notes" ? (
                         <TextField
                           multiline
-                          minRows={4}
+                          rows={4}
                           maxRows={6}
                           variant="outlined"
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
