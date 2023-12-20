@@ -34,6 +34,7 @@ export const SuppliersTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell></TableCell>
                 <TableCell>Full Name</TableCell>
                 <TableCell>Phone Number</TableCell>
                 <TableCell>Company Name</TableCell>
@@ -53,6 +54,7 @@ export const SuppliersTable = (props) => {
                     onClick={() => router.push(`/supply/supplier/${customer.id}`)}
                     style={{ cursor: "pointer" }}
                   >
+                    <TableCell></TableCell>
                     <TableCell>
                       <Stack
                         sx={{ height: "40px" }}
