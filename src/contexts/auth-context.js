@@ -118,7 +118,7 @@ export const AuthProvider = (props) => {
     });
   };
 
-  const signIn = async (email, password) => {
+  const signIn = async (phoneNumber, password) => {
     try {
       const response = await axios.post(
         "http://159.203.141.75:81/api/v2/school/user/login/",
@@ -134,9 +134,9 @@ export const AuthProvider = (props) => {
         },
         {
           headers: {
-            userId: "8989",
+            userId: password,
             securityCode: "ipj0DjOqyd7faka1aa9z1dA1mXESh1zfo5QV8PuuPnJwadTfal3ujesPspAgA2Nb",
-            phoneNumber: "0728110017",
+            phoneNumber: phoneNumber,
             "Content-Type": "application/json",
           },
         }

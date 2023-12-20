@@ -22,22 +22,24 @@ import { Layout as AuthLayout } from "src/layouts/auth/layout";
 const Page = () => {
   const router = useRouter();
   const auth = useAuth();
-  const [method, setMethod] = useState("email");
+  const [method, setMethod] = useState("phoneNumber");
 
   const formik = useFormik({
     initialValues: {
-      email: "demo@devias.io",
+      phoneNumber: "0799999999",
       password: "Password123!",
       submit: null,
     },
     validationSchema: Yup.object({
-      email: Yup.string().email("Must be a valid email").max(255).required("Email is required"),
+      phoneNumber: Yup.string()
+        .matches(/^\d{10}$/, "Must be a valid phone number")
+        .required("Phone number is required"),
       password: Yup.string().max(255).required("Password is required"),
     }),
     onSubmit: async (values, helpers) => {
       try {
         // Use the signIn function from the AuthContext
-        await auth.signIn(values.email, values.password);
+        await auth.signIn(values.phoneNumber, values.password);
 
         // Redirect to the home page after successful login
         router.push("/");
@@ -78,39 +80,23 @@ const Page = () => {
           <div>
             <Stack spacing={1} sx={{ mb: 3 }}>
               <Typography variant="h4">Login</Typography>
-              {/* <Typography
-                color="text.secondary"
-                variant="body2"
-              >
-                Don&apos;t have an account?
-                &nbsp;
-                <Link
-                  component={NextLink}
-                  href="/auth/register"
-                  underline="hover"
-                  variant="subtitle2"
-                >
-                  Register
-                </Link>
-              </Typography> */}
             </Stack>
             <Tabs onChange={handleMethodChange} sx={{ mb: 3 }} value={method}>
-              <Tab label="Email" value="email" />
-              {/* <Tab label="Phone Number" value="phoneNumber" /> */}
+              <Tab label="Phone Number" value="phoneNumber" />
             </Tabs>
-            {method === "email" && (
+            {method === "phoneNumber" && (
               <form noValidate onSubmit={formik.handleSubmit}>
                 <Stack spacing={3}>
                   <TextField
-                    error={!!(formik.touched.email && formik.errors.email)}
+                    error={!!(formik.touched.phoneNumber && formik.errors.phoneNumber)}
                     fullWidth
-                    helperText={formik.touched.email && formik.errors.email}
-                    label="Email Address"
-                    name="email"
+                    helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+                    label="Phone Number"
+                    name="phoneNumber"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
-                    type="email"
-                    value={formik.values.email}
+                    type="tel"
+                    value={formik.values.phoneNumber}
                   />
                   <TextField
                     error={!!(formik.touched.password && formik.errors.password)}
@@ -136,9 +122,8 @@ const Page = () => {
 
                 <Alert color="primary" severity="info" sx={{ mt: 3 }}>
                   <div>
-                    {/* Feal free to login and mange the school tenders suppliers and transactions */}
-                    If you don't have the login details contact us on 0799999999 to register your
-                    school
+                    If you don't have the login details, contact us on 0799999999 to register your
+                    school.
                   </div>
                 </Alert>
               </form>
