@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
-import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
-import ArrowUpOnSquareIcon from "@heroicons/react/24/solid/ArrowUpOnSquareIcon";
-import { Box, Button, Container, Stack, SvgIcon, Typography } from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { useSelection } from "src/hooks/use-selection";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { applyPagination } from "src/utils/apply-pagination";
@@ -13,12 +11,16 @@ import axios from "axios";
 
 const useProducts = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+
         const storedToken = localStorage.getItem("token").toString();
-        const fetchedData = await axios.post(
+        const response = await axios.post(
           "http://159.203.141.75:81/api/v1/school/procurement/products/",
           {
             offset: page * rowsPerPage,
@@ -30,17 +32,19 @@ const useProducts = (page, rowsPerPage) => {
             },
           }
         );
-
-        setData(fetchedData.data.data);
+        setData(response.data.data);
+        setTotal(response.data.message);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [page, rowsPerPage]);
 
-  return data;
+  return { data, total, isLoading };
 };
 
 const useProductIds = (products) => {
@@ -52,7 +56,7 @@ const useProductIds = (products) => {
 const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const products = useProducts(page, rowsPerPage);
+  const { data: products, total, isLoading } = useProducts(page, rowsPerPage);
   const productIds = useProductIds(products);
   const productsSelection = useSelection(productIds);
 
@@ -81,28 +85,6 @@ const Page = () => {
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
                 <Typography variant="h4">Products</Typography>
-                <Stack alignItems="center" direction="row" spacing={1}>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Export
-                  </Button>
-                </Stack>
               </Stack>
               <div>
                 <AddProduct />
@@ -110,7 +92,7 @@ const Page = () => {
             </Stack>
             <ProductSearch />
             <ProductTable
-              count={products.length}
+              count={total}
               items={applyPagination(products, page, rowsPerPage)}
               onDeselectAll={productsSelection.handleDeselectAll}
               onDeselectOne={productsSelection.handleDeselectOne}
@@ -121,6 +103,7 @@ const Page = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={productsSelection.selected}
+              isLoading={isLoading}
             />
           </Stack>
         </Container>

@@ -26,8 +26,8 @@ const Page = () => {
 
   const formik = useFormik({
     initialValues: {
-      phoneNumber: "0799999999",
-      password: "Password123!",
+      phoneNumber: "0728110017",
+      password: "8989",
       submit: null,
     },
     validationSchema: Yup.object({

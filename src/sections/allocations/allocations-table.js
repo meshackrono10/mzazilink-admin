@@ -1,3 +1,4 @@
+// AllocationTable component
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
 import { getInitials } from "src/utils/get-initials";
+import ProgressBars from "src/utils/loading";
 
 export const AllocationTable = (props) => {
   const {
@@ -29,6 +31,7 @@ export const AllocationTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    isLoading = false,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
@@ -41,6 +44,7 @@ export const AllocationTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell></TableCell>
                 <TableCell>To Department</TableCell>
                 <TableCell>Quantity </TableCell>
                 <TableCell>Student / Department</TableCell>
@@ -49,24 +53,27 @@ export const AllocationTable = (props) => {
                 <TableCell>Date Added </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {items.map((allocation) => {
-                const isSelected = selected.includes(allocation.id);
-
-                const createdAt = format(new Date(allocation.date_added), "dd/MM/yyyy");
-
-                return (
-                  <TableRow hover key={allocation.id} selected={isSelected}>
-                    <TableCell>{allocation.allocated_by.full_name}</TableCell>
-                    <TableCell>{allocation.quantity}</TableCell>
-                    <TableCell>{allocation?.student?.student_name}</TableCell>
-                    <TableCell>{allocation.allocated_by.full_name}</TableCell>
-                    <TableCell>{allocation.product.item_name}</TableCell>
-                    <TableCell>{createdAt}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+            {isLoading ? (
+              <ProgressBars />
+            ) : (
+              <TableBody>
+                {items.map((allocation) => {
+                  const isSelected = selected.includes(allocation.id);
+                  const createdAt = format(new Date(allocation.date_added), "dd/MM/yyyy");
+                  return (
+                    <TableRow hover key={allocation.id} selected={isSelected}>
+                      <TableCell></TableCell>
+                      <TableCell>{allocation.allocated_by.full_name}</TableCell>
+                      <TableCell>{allocation.quantity}</TableCell>
+                      <TableCell>{allocation?.student?.student_name}</TableCell>
+                      <TableCell>{allocation.allocated_by.full_name}</TableCell>
+                      <TableCell>{allocation.product.item_name}</TableCell>
+                      <TableCell>{createdAt}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            )}
           </Table>
         </Box>
       </Scrollbar>
@@ -95,4 +102,5 @@ AllocationTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  isLoading: PropTypes.bool,
 };

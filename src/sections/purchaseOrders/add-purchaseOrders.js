@@ -37,8 +37,8 @@ export default function AddPurchaseOrders() {
   });
   const [productsData, setProductsData] = useState([]);
   const [suppliersData, setSuppliersData] = useState([]);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(1000000);
+  const [page, setPage] = useState(1);
   const [selectedProductIdProduct, setSelectedProductIdProduct] = useState("");
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
 
@@ -108,6 +108,7 @@ export default function AddPurchaseOrders() {
       console.log("Response:", response);
 
       // Close the dialog
+      window.location.reload();
       handleClose();
     } catch (error) {
       console.error("Error during form submission:", error);
@@ -221,10 +222,20 @@ export default function AddPurchaseOrders() {
                           <TextField
                             type="date"
                             fullWidth
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
+                            InputLabelProps={{ shrink: true }}
                             onChange={(e) => handleInputChange(inputField.field, e.target.value)}
+                            style={{ padding: "15px" }}
+                            InputProps={{
+                              style: {
+                                // Apply styles for WebKit-based browsers:
+                                "&::-webkit-calendar-picker-indicator": {
+                                  backgroundColor: "white",
+                                  fontSize: "20px",
+                                  padding: "5px",
+                                  cursor: "pointer",
+                                },
+                              },
+                            }}
                           />
                         </FormControl>
                       ) : (

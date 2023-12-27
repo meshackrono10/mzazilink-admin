@@ -1,3 +1,4 @@
+// PurchaseOrdersTable component
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
@@ -16,6 +17,7 @@ import {
 import { Scrollbar } from "src/components/scrollbar";
 import { SeverityPill } from "src/components/severity-pill";
 import { useRouter } from "next/router";
+import ProgressBars from "src/utils/loading";
 
 const statusMap = {
   PENDING: "warning",
@@ -38,6 +40,7 @@ export const PurchaseOrdersTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    isLoading = false,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
@@ -50,6 +53,7 @@ export const PurchaseOrdersTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell></TableCell>
                 <TableCell>Order Number</TableCell>
                 <TableCell>Supplier</TableCell>
                 <TableCell>Requesting Department</TableCell>
@@ -57,30 +61,38 @@ export const PurchaseOrdersTable = (props) => {
                 <TableCell>Expected By</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {items.map((order) => {
-                const isSelected = selected.includes(order.id);
-                const expectedByDate = format(new Date(order.expected_by_date), "dd/MM/yyyy");
 
-                return (
-                  <TableRow
-                    onClick={() => router.push(`/purchaseOrders/purchaseOrders/${order.id}`)}
-                    hover
-                    key={order.id}
-                    selected={isSelected}
-                  >
-                    <TableCell>{order.order_number}</TableCell>
-                    <TableCell>{order.supplier.full_name}</TableCell>
-                    <TableCell>{order.requesting_department}</TableCell>
-                    <TableCell>
-                      <SeverityPill color={statusMap[order.delivery_status]}>
-                        {order.delivery_status}
-                      </SeverityPill>
-                    </TableCell>
-                    <TableCell>{expectedByDate}</TableCell>
-                  </TableRow>
-                );
-              })}
+            <TableBody>
+              {!isLoading ? (
+                <ProgressBars />
+              ) : (
+                <>
+                  {items.map((order) => {
+                    const isSelected = selected.includes(order.id);
+                    const expectedByDate = format(new Date(order.expected_by_date), "dd/MM/yyyy");
+
+                    return (
+                      <TableRow
+                        onClick={() => router.push(`/purchaseOrders/purchaseOrders/${order.id}`)}
+                        hover
+                        key={order.id}
+                        selected={isSelected}
+                      >
+                        <TableCell></TableCell>
+                        <TableCell>{order.order_number}</TableCell>
+                        <TableCell>{order.supplier.full_name}</TableCell>
+                        <TableCell>{order.requesting_department}</TableCell>
+                        <TableCell>
+                          <SeverityPill color={statusMap[order.delivery_status]}>
+                            {order.delivery_status}
+                          </SeverityPill>
+                        </TableCell>
+                        <TableCell>{expectedByDate}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </>
+              )}
             </TableBody>
           </Table>
         </Box>
@@ -110,4 +122,5 @@ PurchaseOrdersTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  isLoading: PropTypes.bool,
 };

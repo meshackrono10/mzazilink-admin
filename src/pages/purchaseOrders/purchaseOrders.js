@@ -1,3 +1,4 @@
+// Page component
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
@@ -13,12 +14,16 @@ import axios from "axios";
 
 const usePurchaseOrders = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+
         const storedToken = localStorage.getItem("token").toString();
-        const fetchedData = await axios.post(
+        const response = await axios.post(
           "http://159.203.141.75:81/api/v1/school/procurement/purchase-orders/",
           {
             offset: page * rowsPerPage,
@@ -31,16 +36,19 @@ const usePurchaseOrders = (page, rowsPerPage) => {
           }
         );
 
-        setData(fetchedData.data.data);
+        setData(response.data.data);
+        setTotal(response.data.message);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [page, rowsPerPage]);
 
-  return data;
+  return { data, total, isLoading };
 };
 
 const usePurchaseOrderIds = (purchaseOrders) => {
@@ -52,7 +60,7 @@ const usePurchaseOrderIds = (purchaseOrders) => {
 const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const purchaseOrders = usePurchaseOrders(page, rowsPerPage);
+  const { data: purchaseOrders, total, isLoading } = usePurchaseOrders(page, rowsPerPage);
   const purchaseOrderIds = usePurchaseOrderIds(purchaseOrders);
   const purchaseOrdersSelection = useSelection(purchaseOrderIds);
 
@@ -81,28 +89,6 @@ const Page = () => {
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
                 <Typography variant="h4">Purchase Orders </Typography>
-                <Stack alignItems="center" direction="row" spacing={1}>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Export
-                  </Button>
-                </Stack>
               </Stack>
               <div>
                 <AddPurchaseOrders />
@@ -110,7 +96,7 @@ const Page = () => {
             </Stack>
             <PurchaseOrdersSearch />
             <PurchaseOrdersTable
-              count={purchaseOrders.length}
+              count={total}
               items={applyPagination(purchaseOrders, page, rowsPerPage)}
               onDeselectAll={purchaseOrdersSelection.handleDeselectAll}
               onDeselectOne={purchaseOrdersSelection.handleDeselectOne}
@@ -121,6 +107,7 @@ const Page = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={purchaseOrdersSelection.selected}
+              isLoading={isLoading}
             />
           </Stack>
         </Container>

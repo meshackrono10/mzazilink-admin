@@ -1,3 +1,4 @@
+// PaymentsPage component
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
@@ -13,13 +14,17 @@ import axios from "axios";
 
 const usePayments = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+
         const storedToken = localStorage.getItem("token").toString();
-        const fetchedData = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/school-payments/",
+        const response = await axios.post(
+          "http://159.203.141.75:81/api/v1/school/procurement/school-purchase/",
           {
             offset: page * rowsPerPage,
             per_page: rowsPerPage,
@@ -31,16 +36,19 @@ const usePayments = (page, rowsPerPage) => {
           }
         );
 
-        setData(fetchedData.data.data);
+        setData(response.data.data);
+        setTotal(response.data.message);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [page, rowsPerPage]);
 
-  return data;
+  return { data, total, isLoading };
 };
 
 const usePaymentIds = (payments) => {
@@ -52,7 +60,7 @@ const usePaymentIds = (payments) => {
 const PaymentsPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const payments = usePayments(page, rowsPerPage);
+  const { data: payments, total, isLoading } = usePayments(page, rowsPerPage);
   const paymentIds = usePaymentIds(payments);
   const paymentsSelection = useSelection(paymentIds);
 
@@ -81,28 +89,6 @@ const PaymentsPage = () => {
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
                 <Typography variant="h4">Payments</Typography>
-                <Stack alignItems="center" direction="row" spacing={1}>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Export
-                  </Button>
-                </Stack>
               </Stack>
               <div>
                 <AddPayment />
@@ -110,7 +96,7 @@ const PaymentsPage = () => {
             </Stack>
             <PaymentSearch />
             <PaymentTable
-              count={payments.length}
+              count={total}
               items={applyPagination(payments, page, rowsPerPage)}
               onDeselectAll={paymentsSelection.handleDeselectAll}
               onDeselectOne={paymentsSelection.handleDeselectOne}
@@ -121,6 +107,7 @@ const PaymentsPage = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={paymentsSelection.selected}
+              isLoading={isLoading}
             />
           </Stack>
         </Container>

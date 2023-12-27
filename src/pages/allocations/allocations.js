@@ -1,3 +1,4 @@
+// Page component
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
@@ -13,10 +14,14 @@ import axios from "axios";
 
 const useAllocations = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+
         const storedToken = localStorage.getItem("token");
         if (!storedToken) {
           // Handle the case where the token is not available
@@ -38,16 +43,18 @@ const useAllocations = (page, rowsPerPage) => {
         );
 
         setData(response.data.data);
-        console.log(response.data.data);
+        setTotal(response.data.message);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [page, rowsPerPage]);
 
-  return data;
+  return { data, total, isLoading };
 };
 
 const useAllocationIds = (allocations) => {
@@ -59,7 +66,7 @@ const useAllocationIds = (allocations) => {
 const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const allocations = useAllocations(page, rowsPerPage);
+  const { data: allocations, total, isLoading } = useAllocations(page, rowsPerPage);
   const allocationIds = useAllocationIds(allocations);
   const allocationsSelection = useSelection(allocationIds);
 
@@ -88,28 +95,6 @@ const Page = () => {
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
                 <Typography variant="h4">Allocations</Typography>
-                <Stack alignItems="center" direction="row" spacing={1}>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Export
-                  </Button>
-                </Stack>
               </Stack>
               <div>
                 <AddAllocation />
@@ -117,7 +102,7 @@ const Page = () => {
             </Stack>
             <AllocationSearch />
             <AllocationTable
-              count={allocations.length}
+              count={total}
               items={applyPagination(allocations, page, rowsPerPage)}
               onDeselectAll={allocationsSelection.handleDeselectAll}
               onDeselectOne={allocationsSelection.handleDeselectOne}
@@ -128,6 +113,7 @@ const Page = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={allocationsSelection.selected}
+              isLoading={isLoading}
             />
           </Stack>
         </Container>

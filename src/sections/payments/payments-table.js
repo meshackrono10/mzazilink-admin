@@ -1,3 +1,4 @@
+// PaymentTable component
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
@@ -9,9 +10,11 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
 import { useRouter } from "next/router";
+import ProgressBars from "src/utils/loading";
 
 export const PaymentTable = (props) => {
   const router = useRouter();
@@ -24,6 +27,7 @@ export const PaymentTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    isLoading = false,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
@@ -36,32 +40,38 @@ export const PaymentTable = (props) => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell></TableCell>
                 <TableCell>Processed By</TableCell>
                 <TableCell>Cheque Number</TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell>Date Paid</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {items.map((payment) => {
-                const isSelected = selected.includes(payment.id);
-                const datePaid = format(new Date(payment.timestamp_paid * 1000), "dd/MM/yyyy");
+            {isLoading ? (
+              <ProgressBars />
+            ) : (
+              <TableBody>
+                {items.map((payment) => {
+                  const isSelected = selected.includes(payment.id);
+                  const datePaid = format(new Date(payment.timestamp_paid * 1000), "dd/MM/yyyy");
 
-                return (
-                  <TableRow
-                    onClick={() => router.push(`/Payments/payment/${payment.id}`)}
-                    hover
-                    key={payment.id}
-                    selected={isSelected}
-                  >
-                    <TableCell>{payment.processed_by.full_name}</TableCell>
-                    <TableCell>{payment.cheque_number}</TableCell>
-                    <TableCell>{`Ksh. ${parseFloat(payment.amount).toFixed(2)}`}</TableCell>
-                    <TableCell>{datePaid}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+                  return (
+                    <TableRow
+                      onClick={() => router.push(`/Payments/payment/${payment.id}`)}
+                      hover
+                      key={payment.id}
+                      selected={isSelected}
+                    >
+                      <TableCell></TableCell>
+                      <TableCell>{payment.processed_by.full_name}</TableCell>
+                      <TableCell>{payment.cheque_number}</TableCell>
+                      <TableCell>{`Ksh. ${parseFloat(payment.amount).toFixed(2)}`}</TableCell>
+                      <TableCell>{datePaid}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            )}
           </Table>
         </Box>
       </Scrollbar>
@@ -90,4 +100,5 @@ PaymentTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  isLoading: PropTypes.bool,
 };

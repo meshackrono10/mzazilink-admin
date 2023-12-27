@@ -1,3 +1,4 @@
+// ExpensesPage component
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import ArrowDownOnSquareIcon from "@heroicons/react/24/solid/ArrowDownOnSquareIcon";
@@ -13,12 +14,16 @@ import axios from "axios";
 
 const useExpenses = (page, rowsPerPage) => {
   const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+
         const storedToken = localStorage.getItem("token").toString();
-        const fetchedData = await axios.post(
+        const response = await axios.post(
           "http://159.203.141.75:81/api/v1/school/procurement/school-expenses/",
           {
             offset: page * rowsPerPage,
@@ -31,16 +36,19 @@ const useExpenses = (page, rowsPerPage) => {
           }
         );
 
-        setData(fetchedData.data.data);
+        setData(response.data.data);
+        setTotal(response.data.message);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [page, rowsPerPage]);
 
-  return data;
+  return { data, total, isLoading };
 };
 
 const useExpenseIds = (expenses) => {
@@ -52,7 +60,7 @@ const useExpenseIds = (expenses) => {
 const ExpensesPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const expenses = useExpenses(page, rowsPerPage);
+  const { data: expenses, total, isLoading } = useExpenses(page, rowsPerPage);
   const expenseIds = useExpenseIds(expenses);
   const expensesSelection = useSelection(expenseIds);
 
@@ -81,28 +89,6 @@ const ExpensesPage = () => {
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
                 <Typography variant="h4">Expenses</Typography>
-                <Stack alignItems="center" direction="row" spacing={1}>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    }
-                  >
-                    Export
-                  </Button>
-                </Stack>
               </Stack>
               <div>
                 <AddExpenses />
@@ -110,7 +96,7 @@ const ExpensesPage = () => {
             </Stack>
             <ExpensesSearch />
             <ExpensesTable
-              count={expenses.length}
+              count={total}
               items={applyPagination(expenses, page, rowsPerPage)}
               onDeselectAll={expensesSelection.handleDeselectAll}
               onDeselectOne={expensesSelection.handleDeselectOne}
@@ -121,6 +107,7 @@ const ExpensesPage = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={expensesSelection.selected}
+              isLoading={isLoading}
             />
           </Stack>
         </Container>

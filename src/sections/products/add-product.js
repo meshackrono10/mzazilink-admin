@@ -23,7 +23,6 @@ import {
   RadioGroup,
   Radio,
 } from "@mui/material";
-import MaxHeightTextarea from "src/components/textArea";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
 
@@ -93,6 +92,7 @@ export default function AddProduct() {
       console.log("Response:", response);
 
       // Close the dialog
+      window.location.reload();
       handleClose();
     } catch (error) {
       console.error("Error during form submission:", error);
@@ -195,10 +195,9 @@ export default function AddProduct() {
                         <TextField
                           multiline
                           rows={4}
-                          maxRows={6}
                           variant="outlined"
                           onChange={(e) => handleInputChange(inputField.field, e.target.value)}
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", minHeight: "120px" }}
                         />
                       ) : (
                         <FormControl sx={{ width: "100%" }}>

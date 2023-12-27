@@ -107,6 +107,7 @@ export default function AddPayment() {
       console.log("Response:", response);
 
       // Close the dialog
+      window.location.reload();
       handleClose();
     } catch (error) {
       console.error("Error during form submission:", error);

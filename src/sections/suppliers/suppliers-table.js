@@ -1,3 +1,4 @@
+// SuppliersTable component
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
 import { useRouter } from "next/router";
+import ProgressBars from "src/utils/loading";
 
 export const SuppliersTable = (props) => {
   const router = useRouter();
@@ -25,6 +27,7 @@ export const SuppliersTable = (props) => {
     page = 0,
     rowsPerPage = 0,
     selected = [],
+    isLoading = false,
   } = props;
 
   return (
@@ -42,37 +45,41 @@ export const SuppliersTable = (props) => {
                 <TableCell>Date Registered</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {items.map((customer) => {
-                const isSelected = selected.includes(customer.id);
-                const dateRegistered = format(new Date(customer.date_registered), "dd/MM/yyyy");
-                return (
-                  <TableRow
-                    hover
-                    key={customer.id}
-                    selected={isSelected}
-                    onClick={() => router.push(`/supply/supplier/${customer.id}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <TableCell></TableCell>
-                    <TableCell>
-                      <Stack
-                        sx={{ height: "40px" }}
-                        alignItems="center"
-                        direction="row"
-                        spacing={2}
-                      >
-                        <Typography variant="subtitle2">{customer.full_name}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>{customer.phone_number}</TableCell>
-                    <TableCell>{customer.company_name}</TableCell>
-                    <TableCell>{customer.company_registration_number}</TableCell>
-                    <TableCell>{dateRegistered}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+            {isLoading ? (
+              <ProgressBars />
+            ) : (
+              <TableBody>
+                {items.map((supplier) => {
+                  const isSelected = selected.includes(supplier.id);
+                  const dateRegistered = format(new Date(supplier.date_registered), "dd/MM/yyyy");
+                  return (
+                    <TableRow
+                      hover
+                      key={supplier.id}
+                      selected={isSelected}
+                      onClick={() => router.push(`/supply/supplier/${supplier.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <TableCell></TableCell>
+                      <TableCell>
+                        <Stack
+                          sx={{ height: "40px" }}
+                          alignItems="center"
+                          direction="row"
+                          spacing={2}
+                        >
+                          <Typography variant="subtitle2">{supplier.full_name}</Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>{supplier.phone_number}</TableCell>
+                      <TableCell>{supplier.company_name}</TableCell>
+                      <TableCell>{supplier.company_registration_number}</TableCell>
+                      <TableCell>{dateRegistered}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            )}
           </Table>
         </Box>
       </Scrollbar>
@@ -97,4 +104,5 @@ SuppliersTable.propTypes = {
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
   selected: PropTypes.array,
+  isLoading: PropTypes.bool,
 };
