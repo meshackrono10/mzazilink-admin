@@ -30,7 +30,7 @@ const useAllocations = (page, rowsPerPage) => {
         }
 
         const response = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/stream-allocations/",
+          "http://159.203.141.75:81/api/v1/school/procurement/school-allocations/",
           {
             offset: page * rowsPerPage,
             per_page: rowsPerPage,

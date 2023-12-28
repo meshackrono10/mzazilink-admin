@@ -63,7 +63,7 @@ export const PurchaseOrdersTable = (props) => {
             </TableHead>
 
             <TableBody>
-              {!isLoading ? (
+              {isLoading ? (
                 <ProgressBars />
               ) : (
                 <>

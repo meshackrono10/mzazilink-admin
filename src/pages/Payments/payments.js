@@ -24,7 +24,7 @@ const usePayments = (page, rowsPerPage) => {
 
         const storedToken = localStorage.getItem("token").toString();
         const response = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/school-purchase/",
+          "http://159.203.141.75:81/api/v1/school/procurement/school-payment/",
           {
             offset: page * rowsPerPage,
             per_page: rowsPerPage,
