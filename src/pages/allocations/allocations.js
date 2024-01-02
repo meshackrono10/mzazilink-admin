@@ -30,7 +30,7 @@ const useAllocations = (page, rowsPerPage) => {
         }
 
         const response = await axios.post(
-          "http://159.203.141.75:81/api/v1/school/procurement/school-allocations/",
+          "http://159.203.141.75:81/api/v1/school/procurement/allocations/",
           {
             offset: page * rowsPerPage,
             per_page: rowsPerPage,
@@ -44,6 +44,7 @@ const useAllocations = (page, rowsPerPage) => {
 
         setData(response.data.data);
         setTotal(response.data.message);
+        console.log(response.data.data);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);

@@ -59,14 +59,14 @@ export const AllocationTable = (props) => {
               <TableBody>
                 {items.map((allocation) => {
                   const isSelected = selected.includes(allocation.id);
-                  const createdAt = format(new Date(allocation.date_added), "dd/MM/yyyy");
+                  const createdAt = format(new Date(allocation.date), "dd/MM/yyyy");
                   return (
                     <TableRow hover key={allocation.id} selected={isSelected}>
                       <TableCell></TableCell>
-                      <TableCell>{allocation.allocated_by.full_name}</TableCell>
+                      <TableCell>{allocation.processed_by.full_name}</TableCell>
                       <TableCell>{allocation.quantity}</TableCell>
-                      <TableCell>{allocation?.student?.student_name}</TableCell>
-                      <TableCell>{allocation.allocated_by.full_name}</TableCell>
+                      <TableCell>{allocation?.to_department}</TableCell>
+                      <TableCell>{allocation.processed_by.full_name}</TableCell>
                       <TableCell>{allocation.product.item_name}</TableCell>
                       <TableCell>{createdAt}</TableCell>
                     </TableRow>
